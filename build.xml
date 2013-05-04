@@ -1,0 +1,37 @@
+<project name="nonogram-solver" default="build">
+
+<property name="package-version" value="0.1" />
+<property name="distfile" value="${ant.project.name}.jar" />
+
+<target name="init-builddir">
+<mkdir dir="build" />
+</target>
+
+<target name="compile" depends="init-builddir">
+<javac srcdir="src"
+	destdir="build"
+	includeantruntime="false"
+	debug="true" debuglevel="lines,vars,source"
+	source="1.7" target="1.7"
+       >
+	<compilerarg value="-Xlint:unchecked" />
+	<compilerarg value="-Xlint:deprecation" />
+</javac>
+</target>
+
+<target name="build" depends="compile">
+
+<jar destfile="${distfile}" basedir="build">
+	<manifest>
+		<attribute name="Main-Class" value="nonograms.MainWindow" />
+		<attribute name="Implementation-Version" value="${package-version}" />
+	</manifest>
+</jar>
+</target>
+
+<target name="clean">
+<delete dir="build" />
+<delete file="${distfile}" />
+</target>
+
+</project>
