@@ -1,6 +1,7 @@
 package nonograms;
 
 import java.awt.*;
+import java.awt.event.*;
 import java.awt.geom.*;
 import javax.swing.*;
 
@@ -23,6 +24,25 @@ public class NonogramView extends JComponent
 		this.metricsDirty = true;
 
 		setFont(new Font("Arial", Font.BOLD, 11));
+		MouseAdapter mouse = new MouseAdapter() {
+			public void mousePressed(MouseEvent evt) {
+				onMousePressed(evt);
+			}
+		};
+		addMouseListener(mouse);
+	}
+
+	private void onMousePressed(MouseEvent evt)
+	{
+		int row = (evt.getY() - maxColumnHintHeight) / rowHeight;
+		int column = (evt.getX() - maxRowHintWidth) / columnWidth;
+
+		if (row >= 0 && row < model.getHeight() &&
+			column >= 0 && column < model.getWidth())
+		{
+			onCellPressed(column, row, evt.getButton());
+			return;
+		}
 	}
 
 	@Override
@@ -106,18 +126,50 @@ public class NonogramView extends JComponent
 			maxColumnHintHeight + row * rowHeight + fm.getAscent() + 1);
 	}
 
+	void drawFilledCell(Graphics2D gr, int x, int y)
+	{
+		Point p = getCellPosition(x, y);
+		gr.fillRect(p.x+2,p.y+2,
+			columnWidth-3,
+			rowHeight-3);
+	}
+
+	void drawBlockedCell(Graphics2D gr, int x, int y)
+	{
+		Paint oldPaint = gr.getPaint();
+		gr.setColor(Color.RED);
+
+		Point p = getCellPosition(x, y);
+		gr.drawLine(p.x + 4, p.y + 5,  p.x + 10, p.y + 11);
+		gr.drawLine(p.x + 5, p.y + 5,  p.x + 11, p.y + 11);
+		gr.drawLine(p.x + 4, p.y + 11, p.x + 10, p.y + 5);
+		gr.drawLine(p.x + 5, p.y + 11, p.x + 11, p.y + 5);
+
+		gr.setPaint(oldPaint);
+	}
+
+	public Point getCellPosition(int col, int row)
+	{
+		return new Point(
+			maxRowHintWidth + col * columnWidth + col/5,
+			maxColumnHintHeight + row * rowHeight + row/5
+			);
+	}
+
 	@Override
 	public void paintComponent(Graphics gr1)
 	{
 		Graphics2D gr = (Graphics2D) gr1;
 
+		int farRight = maxRowHintWidth + model.getWidth() * columnWidth + model.getWidth() / 5;
+		int farBottom = maxColumnHintHeight + model.getHeight() * rowHeight + model.getHeight() / 5;
+
 		for (int i = 0; i <= model.getWidth(); i++) {
-			int x = maxRowHintWidth + i * columnWidth;
-			gr.drawLine(x, maxColumnHintHeight,
-				x, maxColumnHintHeight + model.getHeight() * rowHeight);
-			if (i % 5 == 0) {
-				gr.drawLine(x+1, maxColumnHintHeight,
-					x+1, maxColumnHintHeight + model.getHeight() * rowHeight);
+			Point p = getCellPosition(i, 0);
+			gr.drawLine(p.x, p.y, p.x, farBottom);
+			if (i % 5 == 4) {
+				gr.drawLine(p.x+columnWidth, p.y,
+					p.x+columnWidth, farBottom);
 			}
 
 			if (i < model.getWidth()) {
@@ -126,16 +178,50 @@ public class NonogramView extends JComponent
 		}
 
 		for (int i = 0; i <= model.getHeight(); i++) {
-			int y = maxColumnHintHeight + i * rowHeight;
-			gr.drawLine(maxRowHintWidth, y,
-				maxRowHintWidth + model.getWidth() * columnWidth, y);
-			if (i % 5 == 0) {
-				gr.drawLine(maxRowHintWidth, y+1,
-					maxRowHintWidth + model.getWidth() * columnWidth, y+1);
+			Point p = getCellPosition(0, i);
+			gr.drawLine(p.x, p.y, farRight, p.y);
+			if (i % 5 == 4) {
+				gr.drawLine(p.x, p.y+rowHeight,
+					farRight, p.y+rowHeight);
 			}
 
 			if (i < model.getHeight()) {
 				drawRowHint(gr, i);
+			}
+		}
+
+		for (int y = 0; y < model.getHeight(); y++) {
+			for (int x = 0; x < model.getWidth(); x++) {
+				if (model.grid[y][x] == 1) {
+					drawFilledCell(gr, x, y);
+				}
+				else if (model.grid[y][x] == -1) {
+					drawBlockedCell(gr, x, y);
+				}
+			}
+		}
+	}
+
+	void onCellPressed(int x, int y, int button)
+	{
+		if (button == MouseEvent.BUTTON1) {
+			if (model.grid[y][x] == 1) {
+				model.grid[y][x] = 0;
+				repaint();
+			}
+			else {
+				model.grid[y][x] = 1;
+				repaint();
+			}
+		}
+		else if (button == MouseEvent.BUTTON3) {
+			if (model.grid[y][x] == -1) {
+				model.grid[y][x] = 0;
+				repaint();
+			}
+			else {
+				model.grid[y][x] = -1;
+				repaint();
 			}
 		}
 	}
