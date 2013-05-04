@@ -75,10 +75,8 @@ public class NonogramView extends JComponent
 	{
 		StringBuilder sb = new StringBuilder();
 		for (int j = 0; j < model.rowHints[row].length; j++) {
-			if (j != 0) {
-				sb.append(" ");
-			}
 			sb.append(Integer.toString(model.rowHints[row][j]));
+			sb.append(" ");
 		}
 		return sb.toString();
 	}
@@ -105,7 +103,7 @@ public class NonogramView extends JComponent
 
 		gr.drawString(s,
 			maxRowHintWidth - fm.stringWidth(s),
-			maxColumnHintHeight + row * rowHeight + fm.getAscent());
+			maxColumnHintHeight + row * rowHeight + fm.getAscent() + 1);
 	}
 
 	@Override
