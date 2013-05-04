@@ -13,6 +13,15 @@ public class Nonogram
 		rowHints = new int[height][0];
 	}
 
+	public byte[] getColumn(int column)
+	{
+		byte[] values = new byte[getHeight()];
+		for (int i = 0; i < values.length; i++) {
+			values[i] = grid[i][column];
+		}
+		return values;
+	}
+
 	public int getWidth()
 	{
 		return columnHints.length;

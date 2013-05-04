@@ -1,6 +1,7 @@
 package nonograms;
 
 import java.awt.*;
+import java.awt.event.*;
 import javax.swing.*;
 
 public class MainWindow extends JFrame
@@ -58,9 +59,50 @@ public class MainWindow extends JFrame
 		this.view = new NonogramView(sample2());
 		add(view, BorderLayout.CENTER);
 
+		JPanel buttonPane = new JPanel();
+		JButton btn1 = new JButton("Solve By Row");
+		btn1.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent evt) {
+				solveByRow();
+			}});
+		buttonPane.add(btn1);
+
+		JButton btn2 = new JButton("Solve By Column");
+		btn2.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent evt) {
+				solveByColumn();
+			}});
+		buttonPane.add(btn2);
+
+		add(buttonPane, BorderLayout.SOUTH);
+
 		pack();
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		setLocationRelativeTo(null);
+	}
+
+	void solveByColumn()
+	{
+		RowSolver solver = new RowSolver();
+		for (int i = 0; i < view.model.getWidth(); i++) {
+			int [] hint = view.model.columnHints[i];
+			byte [] values = view.model.getColumn(i);
+			solver.solve(hint, values);
+			for (int j = 0; j < values.length; j++) {
+				view.model.grid[j][i] = values[j];
+			}
+		}
+		repaint();
+	}
+
+	void solveByRow()
+	{
+		RowSolver solver = new RowSolver();
+		for (int i = 0; i < view.model.getHeight(); i++) {
+			int [] hint = view.model.rowHints[i];
+			solver.solve(hint, view.model.grid[i]);
+		}
+		repaint();
 	}
 
 	public static void main(String [] args)
