@@ -12,6 +12,7 @@ public class RowSolver
 	}
 
 	public void solve()
+		throws Contradiction
 	{
 		if (row.getHintCount() == 0) {
 			// special case
@@ -53,57 +54,77 @@ public class RowSolver
 			return;
 		}
 
-		solveForward();
+		solveForward(0,0);
 
 		System.out.println();
 	}
 
-	void solveForward()
+	void solveForward(int hintIdx, int start)
+		throws Contradiction
 	{
-		solveForward(0,0);
-	}
-
-	void solveForward(int hintIdx, int col)
-	{
-		if (hintIdx >= row.getHintCount() ||
-			col >= row.getLength()) return;
+		if (hintIdx >= row.getHintCount()) {
+			// rest of the row must be clear
+			for (int j = start; j < row.getLength(); j++) {
+				row.set(j, CLEAR);
+			}
+			return;
+		}
 
 		int curHint = row.getHint(hintIdx);
+		if (start + curHint >= row.getLength()) {
+			throw new Contradiction();
+		}
 
-		if (row.get(col) == -1) {
-			solveForward(hintIdx, col+1);
+		if (row.get(start) == CLEAR) {
+			solveForward(hintIdx, start+1);
 			return;
 		}
-		else if (row.get(col) == 1) {
+		else if (row.get(start) == FILLED) {
 			// fill in the rest
 			for (int j = 1; j < curHint; j++) {
-				row.set(col+j, FILLED);
+				row.set(start+j, FILLED);
 			}
-			if (col+curHint < row.getLength()) {
-				row.set(col+curHint, CLEAR);
+			if (start+curHint < row.getLength()) {
+				row.set(start+curHint, CLEAR);
 			}
-			solveForward(hintIdx+1, col+curHint+1);
+			solveForward(hintIdx+1, start+curHint+1);
 			return;
 		}
 
-		assert row.get(col) == 0;
+		assert row.get(start) == UNKNOWN;
 
 		// look ahead to see if any cell has been set
+		{
+		int j = 1;
+		while (j < curHint && row.get(start+j) == UNKNOWN)
+			j++;
 
-		for (int j = 1; j < curHint; j++) {
-			if (row.get(col+j) == -1) {
-				// cannot fit here
-				row.set(col, CLEAR);
-				return;
-			}
+		if (j < curHint && row.get(start+j) == CLEAR) {
+			// cannot fit here
+			row.set(start, CLEAR);
+			return;
 		}
 
-		if (col+curHint < row.getLength()) {
-			if (row.get(col+curHint) == 1) {
-				// this span cannot start here
-				row.set(col, CLEAR);
-				return;
+		if (j + 1 < curHint && row.get(start+j) == FILLED) {
+			while (j + 1 < curHint) {
+				j++;
+				row.set(start+j, FILLED);
 			}
+		}
+		}
+
+		// look ahead to the next known-clear cell
+		{
+		int j = curHint;
+		while (start+j < row.getLength() &&
+			row.get(start+j) != CLEAR) {
+			j++;
+		}
+
+		if (start+j < row.getLength() && j - curHint < curHint) {
+			row.set(start+j-curHint, FILLED);
+			return;
+		}
 		}
 	}
 
@@ -129,5 +150,9 @@ public class RowSolver
 			}
 			col += curHint + 1;
 		}
+	}
+
+	public static class Contradiction extends Exception
+	{
 	}
 }

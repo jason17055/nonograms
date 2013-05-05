@@ -84,7 +84,16 @@ public class MainWindow extends JFrame
 	void solveByColumn()
 	{
 		for (int i = 0; i < view.model.getWidth(); i++) {
+			try {
 			new RowSolver(view.model.getColumn(i)).solve();
+			}
+			catch (RowSolver.Contradiction e) {
+				JOptionPane.showMessageDialog(this,
+				"Contradiction in column "+(i+1),
+				"Contradiction",
+				JOptionPane.INFORMATION_MESSAGE);
+				break;
+			}
 		}
 		repaint();
 	}
@@ -92,7 +101,16 @@ public class MainWindow extends JFrame
 	void solveByRow()
 	{
 		for (int i = 0; i < view.model.getHeight(); i++) {
+			try {
 			new RowSolver(view.model.getRow(i)).solve();
+			}
+			catch (RowSolver.Contradiction e) {
+				JOptionPane.showMessageDialog(this,
+				"Contradiction in row "+(i+1),
+				"Contradiction",
+				JOptionPane.INFORMATION_MESSAGE);
+				break;
+			}
 		}
 		repaint();
 	}
