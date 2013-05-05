@@ -164,6 +164,22 @@ public class NonogramView extends JComponent
 		int farRight = maxRowHintWidth + model.getWidth() * columnWidth + model.getWidth() / 5;
 		int farBottom = maxColumnHintHeight + model.getHeight() * rowHeight + model.getHeight() / 5;
 
+		gr.setColor(Color.YELLOW);
+		for (int i = 0; i < model.getWidth(); i++) {
+			if (new RowSolver(model.getColumn(i)).hasContradiction()) {
+				Point p = getCellPosition(i, 0);
+				gr.fillRect(p.x, p.y, columnWidth, farBottom-p.y);
+			}
+		}
+
+		for (int i = 0; i < model.getHeight(); i++) {
+			if (new RowSolver(model.getRow(i)).hasContradiction()) {
+				Point p = getCellPosition(0, i);
+				gr.fillRect(p.x, p.y, farRight-p.x, rowHeight);
+			}
+		}
+
+		gr.setColor(Color.BLACK);
 		for (int i = 0; i <= model.getWidth(); i++) {
 			Point p = getCellPosition(i, 0);
 			gr.drawLine(p.x, p.y, p.x, farBottom);
