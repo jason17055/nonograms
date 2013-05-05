@@ -63,6 +63,8 @@ public class MainWindow extends JFrame
 
 	public MainWindow(Nonogram N)
 	{
+		super("Nonogram Solver");
+
 		this.view = new NonogramView(N);
 		add(view, BorderLayout.CENTER);
 
@@ -157,29 +159,27 @@ public class MainWindow extends JFrame
 	{
 		assert N.grid[y][x] == UNKNOWN;
 
-		try {
 		N.grid[y][x] = FILLED;
-		if (new RowSolver(N.getRow(y)).hasContradiction()) {
-			return CLEAR;
-		}
-		if (new RowSolver(N.getColumn(x)).hasContradiction()) {
+		boolean cannotBeFilled =
+			new RowSolver(N.getRow(y)).hasContradiction() ||
+			new RowSolver(N.getColumn(x)).hasContradiction();
+
+		N.grid[y][x] = CLEAR;
+		boolean cannotBeClear =
+			new RowSolver(N.getRow(y)).hasContradiction() ||
+			new RowSolver(N.getColumn(x)).hasContradiction();
+
+		N.grid[y][x] = UNKNOWN;
+
+		if (cannotBeFilled && !cannotBeClear) {
 			return CLEAR;
 		}
 
-		N.grid[y][x] = CLEAR;
-		if (new RowSolver(N.getRow(y)).hasContradiction()) {
-			return FILLED;
-		}
-		if (new RowSolver(N.getColumn(x)).hasContradiction()) {
+		if (cannotBeClear && !cannotBeFilled) {
 			return FILLED;
 		}
 
 		return UNKNOWN;
-
-		}
-		finally {
-			N.grid[y][x] = UNKNOWN;
-		}
 	}
 
 	public static void main(final String [] args)
