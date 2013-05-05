@@ -56,8 +56,8 @@ public class NonogramView extends JComponent
 		}
 
 		return new Dimension(
-			maxRowHintWidth + columnWidth * model.getWidth() + 2,
-			maxColumnHintHeight + rowHeight * model.getHeight() + 2
+			maxRowHintWidth + columnWidth * model.getWidth() + model.getWidth()/5 + 1,
+			maxColumnHintHeight + rowHeight * model.getHeight() + model.getHeight()/5 + 1
 			);
 	}
 
