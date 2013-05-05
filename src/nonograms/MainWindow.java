@@ -69,19 +69,12 @@ public class MainWindow extends JFrame
 		add(view, BorderLayout.CENTER);
 
 		JPanel buttonPane = new JPanel();
-		JButton btn1 = new JButton("Solve By Row");
+		JButton btn1 = new JButton("Start Over");
 		btn1.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent evt) {
-				solveByRow();
+				startOver();
 			}});
 		buttonPane.add(btn1);
-
-		JButton btn2 = new JButton("Solve By Column");
-		btn2.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent evt) {
-				solveByColumn();
-			}});
-		buttonPane.add(btn2);
 
 		JButton btn3 = new JButton("Solve Step");
 		btn3.addActionListener(new ActionListener() {
@@ -97,35 +90,11 @@ public class MainWindow extends JFrame
 		setLocationRelativeTo(null);
 	}
 
-	void solveByColumn()
+	void startOver()
 	{
-		for (int i = 0; i < view.model.getWidth(); i++) {
-			try {
-			new RowSolver(view.model.getColumn(i)).solve();
-			}
-			catch (RowSolver.Contradiction e) {
-				JOptionPane.showMessageDialog(this,
-				"Contradiction in column "+(i+1),
-				"Contradiction",
-				JOptionPane.INFORMATION_MESSAGE);
-				break;
-			}
-		}
-		view.repaint();
-	}
-
-	void solveByRow()
-	{
-		for (int i = 0; i < view.model.getHeight(); i++) {
-			try {
-			new RowSolver(view.model.getRow(i)).solve();
-			}
-			catch (RowSolver.Contradiction e) {
-				JOptionPane.showMessageDialog(this,
-				"Contradiction in row "+(i+1),
-				"Contradiction",
-				JOptionPane.INFORMATION_MESSAGE);
-				break;
+		for (int y = 0; y < view.model.getHeight(); y++) {
+			for (int x = 0; x < view.model.getWidth(); x++) {
+				view.model.grid[y][x] = UNKNOWN;
 			}
 		}
 		view.repaint();
