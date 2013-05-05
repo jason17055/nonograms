@@ -55,6 +55,7 @@ public class RowSolver
 		}
 
 		solveForward(0,0);
+		new RowSolver(new ReverseRowWrapper(row)).solveForward(0,0);
 
 		System.out.println();
 	}
@@ -71,7 +72,7 @@ public class RowSolver
 		}
 
 		int curHint = row.getHint(hintIdx);
-		if (start + curHint >= row.getLength()) {
+		if (start + curHint > row.getLength()) {
 			throw new Contradiction();
 		}
 
@@ -94,7 +95,6 @@ public class RowSolver
 		assert row.get(start) == UNKNOWN;
 
 		// look ahead to see if any cell has been set
-		{
 		int j = 1;
 		while (j < curHint && row.get(start+j) == UNKNOWN)
 			j++;
@@ -105,26 +105,25 @@ public class RowSolver
 			return;
 		}
 
-		if (j + 1 < curHint && row.get(start+j) == FILLED) {
+		if (j < curHint && row.get(start+j) == FILLED) {
 			while (j + 1 < curHint) {
 				j++;
 				row.set(start+j, FILLED);
 			}
-		}
-		}
 
-		// look ahead to the next known-clear cell
-		{
-		int j = curHint;
-		while (start+j < row.getLength() &&
-			row.get(start+j) != CLEAR) {
-			j++;
-		}
+			// we've found this span, now check ahead to see
+			// if there's any known-clear cell
 
-		if (start+j < row.getLength() && j - curHint < curHint) {
-			row.set(start+j-curHint, FILLED);
-			return;
-		}
+			while (start+j < row.getLength() &&
+				row.get(start+j) != CLEAR)
+			{
+				j++;
+			}
+
+			if (start+j < row.getLength() && j - curHint < curHint) {
+				row.set(start+j-curHint, FILLED);
+				return;
+			}
 		}
 	}
 
@@ -154,5 +153,41 @@ public class RowSolver
 
 	public static class Contradiction extends Exception
 	{
+	}
+
+	static class ReverseRowWrapper implements NonogramRow
+	{
+		NonogramRow orow;
+
+		ReverseRowWrapper(NonogramRow row) {
+			this.orow = row;
+		}
+
+		public int getHintCount() {
+			return orow.getHintCount();
+		}
+
+		public int getHint(int hintIdx) {
+			return orow.getHint(
+				orow.getHintCount() - 1 - hintIdx
+				);
+		}
+
+		public int getLength() {
+			return orow.getLength();
+		}
+
+		public byte get(int index) {
+			return orow.get(
+				orow.getLength() - 1 - index
+				);
+		}
+
+		public void set(int index, byte value) {
+			orow.set(
+				orow.getLength() - 1 - index,
+				value
+				);
+		}
 	}
 }
