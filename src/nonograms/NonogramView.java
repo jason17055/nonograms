@@ -9,6 +9,8 @@ public class NonogramView extends JComponent
 {
 	Nonogram model;
 
+	boolean editMode;
+
 	boolean metricsDirty;
 	int rowHeight;
 	int maxRowHintWidth;

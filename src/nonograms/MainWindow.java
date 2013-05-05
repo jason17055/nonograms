@@ -9,6 +9,7 @@ import static nonograms.Nonogram.*;
 public class MainWindow extends JFrame
 {
 	NonogramView view;
+	JToggleButton editorBtn;
 
 	static Nonogram sample1()
 	{
@@ -55,6 +56,13 @@ public class MainWindow extends JFrame
 			}});
 		buttonPane.add(btn3);
 
+		editorBtn = new JToggleButton("Editor");
+		editorBtn.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent evt) {
+				editorClicked();
+			}});
+		buttonPane.add(editorBtn);
+
 		add(buttonPane, BorderLayout.SOUTH);
 
 		pack();
@@ -94,6 +102,11 @@ public class MainWindow extends JFrame
 		}
 
 		view.repaint();
+	}
+
+	void editorClicked()
+	{
+		view.editMode = editorBtn.isSelected();
 	}
 
 	byte solveOneCell(Nonogram N, int x, int y)
