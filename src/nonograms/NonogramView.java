@@ -15,6 +15,8 @@ public class NonogramView extends JComponent
 	int columnWidth;
 	int maxColumnHintHeight;
 
+	boolean [][] tagBlue;
+
 	static final int CELL_WIDTH = 16;
 	static final int CELL_HEIGHT = 16;
 
@@ -22,6 +24,7 @@ public class NonogramView extends JComponent
 	{
 		this.model = model;
 		this.metricsDirty = true;
+		clearTagged();
 
 		setFont(new Font("Arial", Font.BOLD, 11));
 		MouseAdapter mouse = new MouseAdapter() {
@@ -128,16 +131,33 @@ public class NonogramView extends JComponent
 
 	void drawFilledCell(Graphics2D gr, int x, int y)
 	{
+		Paint oldPaint = gr.getPaint();
+
+		if (tagBlue[y][x]) {
+			gr.setColor(Color.BLUE);
+		}
+		else {
+			gr.setColor(Color.BLACK);
+		}
+
 		Point p = getCellPosition(x, y);
 		gr.fillRect(p.x+2,p.y+2,
 			columnWidth-3,
 			rowHeight-3);
+
+		gr.setPaint(oldPaint);
 	}
 
 	void drawBlockedCell(Graphics2D gr, int x, int y)
 	{
 		Paint oldPaint = gr.getPaint();
-		gr.setColor(Color.RED);
+
+		if (tagBlue[y][x]) {
+			gr.setColor(Color.BLUE);
+		}
+		else {
+			gr.setColor(Color.RED);
+		}
 
 		Point p = getCellPosition(x, y);
 		gr.drawLine(p.x + 4, p.y + 5,  p.x + 10, p.y + 11);
@@ -240,5 +260,15 @@ public class NonogramView extends JComponent
 				repaint();
 			}
 		}
+	}
+
+	public void clearTagged()
+	{
+		tagBlue = new boolean[model.getHeight()][model.getWidth()];
+	}
+
+	public void tag(int x, int y)
+	{
+		tagBlue[y][x] = true;
 	}
 }

@@ -3,6 +3,7 @@ package nonograms;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
+import static nonograms.Nonogram.*;
 
 public class MainWindow extends JFrame
 {
@@ -74,6 +75,13 @@ public class MainWindow extends JFrame
 			}});
 		buttonPane.add(btn2);
 
+		JButton btn3 = new JButton("Solve Step");
+		btn3.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent evt) {
+				solveStep();
+			}});
+		buttonPane.add(btn3);
+
 		add(buttonPane, BorderLayout.SOUTH);
 
 		pack();
@@ -95,7 +103,7 @@ public class MainWindow extends JFrame
 				break;
 			}
 		}
-		repaint();
+		view.repaint();
 	}
 
 	void solveByRow()
@@ -112,7 +120,60 @@ public class MainWindow extends JFrame
 				break;
 			}
 		}
-		repaint();
+		view.repaint();
+	}
+
+	void solveStep()
+	{
+		view.clearTagged();
+		byte [][] changes = new byte[view.model.getHeight()][view.model.getWidth()];
+		for (int y = 0; y < view.model.getHeight(); y++) {
+			for (int x = 0; x < view.model.getWidth(); x++) {
+				if (view.model.grid[y][x] == UNKNOWN) {
+					changes[y][x] = solveOneCell(view.model, x, y);
+				}
+			}
+		}
+
+		for (int y = 0; y < view.model.getHeight(); y++) {
+			for (int x = 0; x < view.model.getWidth(); x++) {
+				if (changes[y][x] != UNKNOWN) {
+					view.model.grid[y][x] = changes[y][x];
+					view.tag(x, y);
+				}
+			}
+		}
+
+		view.repaint();
+	}
+
+	byte solveOneCell(Nonogram N, int x, int y)
+	{
+		assert N.grid[y][x] == UNKNOWN;
+
+		try {
+		N.grid[y][x] = FILLED;
+		if (new RowSolver(N.getRow(y)).hasContradiction()) {
+			return CLEAR;
+		}
+		if (new RowSolver(N.getColumn(x)).hasContradiction()) {
+			return CLEAR;
+		}
+
+		N.grid[y][x] = CLEAR;
+		if (new RowSolver(N.getRow(y)).hasContradiction()) {
+			return FILLED;
+		}
+		if (new RowSolver(N.getColumn(x)).hasContradiction()) {
+			return FILLED;
+		}
+
+		return UNKNOWN;
+
+		}
+		finally {
+			N.grid[y][x] = UNKNOWN;
+		}
 	}
 
 	public static void main(String [] args)
