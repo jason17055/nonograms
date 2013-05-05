@@ -84,12 +84,7 @@ public class MainWindow extends JFrame
 	void solveByColumn()
 	{
 		for (int i = 0; i < view.model.getWidth(); i++) {
-			int [] hint = view.model.columnHints[i];
-			byte [] values = view.model.getColumn(i);
-			new RowSolver(hint, values).solve();
-			for (int j = 0; j < values.length; j++) {
-				view.model.grid[j][i] = values[j];
-			}
+			new RowSolver(view.model.getColumn(i)).solve();
 		}
 		repaint();
 	}
@@ -97,8 +92,7 @@ public class MainWindow extends JFrame
 	void solveByRow()
 	{
 		for (int i = 0; i < view.model.getHeight(); i++) {
-			int [] hint = view.model.rowHints[i];
-			new RowSolver(hint, view.model.grid[i]).solve();
+			new RowSolver(view.model.getRow(i)).solve();
 		}
 		repaint();
 	}

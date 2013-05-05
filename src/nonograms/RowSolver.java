@@ -1,51 +1,51 @@
 package nonograms;
 
+import static nonograms.Nonogram.*;
+
 public class RowSolver
 {
-	int [] hint;
-	byte [] values;
+	NonogramRow row;
 
-	public RowSolver(int [] hint, byte [] values)
+	public RowSolver(NonogramRow row)
 	{
-		this.hint = hint;
-		this.values = values;
+		this.row = row;
 	}
 
 	public void solve()
 	{
-		if (hint.length == 0) {
+		if (row.getHintCount() == 0) {
 			// special case
-			for (int j = 0; j < values.length; j++) {
-				values[j] = -1;
+			for (int j = 0; j < row.getLength(); j++) {
+				row.set(j, CLEAR);
 			}
 			return;
 		}
 
 		System.out.print("hint:");
-		for (int i = 0; i < hint.length; i++) {
-			System.out.print(" " + hint[i]);
+		for (int i = 0; i < row.getHintCount(); i++) {
+			System.out.print(" " + row.getHint(i));
 		}
 		System.out.println();
 
 		System.out.print("row: [");
-		for (int i = 0; i < values.length; i++) {
-			System.out.print(values[i] == 1 ? '#' :
-				values[i] == -1 ? '.' : ' ');
+		for (int i = 0; i < row.getLength(); i++) {
+			System.out.print(row.get(i) == FILLED ? '#' :
+				row.get(i) == CLEAR ? '.' : ' ');
 		}
 		System.out.println("]");
 
 		int filled = 0;
 		int unknown = 0;
-		for (int j = 0; j < values.length; j++) {
-			if (values[j] == 1) {
+		for (int j = 0; j < row.getLength(); j++) {
+			if (row.get(j) == FILLED) {
 				filled++;
 			}
-			else if (values[j] == 0) {
+			else if (row.get(j) == UNKNOWN) {
 				unknown++;
 			}
 		}
 
-		if (unknown == values.length) {
+		if (unknown == row.getLength()) {
 			assert filled == 0;
 
 			solveInitial();
@@ -65,43 +65,43 @@ public class RowSolver
 
 	void solveForward(int hintIdx, int col)
 	{
-		if (hintIdx >= hint.length ||
-			col >= values.length) return;
+		if (hintIdx >= row.getHintCount() ||
+			col >= row.getLength()) return;
 
-		int curHint = hint[hintIdx];
+		int curHint = row.getHint(hintIdx);
 
-		if (values[col] == -1) {
+		if (row.get(col) == -1) {
 			solveForward(hintIdx, col+1);
 			return;
 		}
-		else if (values[col] == 1) {
+		else if (row.get(col) == 1) {
 			// fill in the rest
 			for (int j = 1; j < curHint; j++) {
-				values[col+j] = 1;
+				row.set(col+j, FILLED);
 			}
-			if (col+curHint < values.length) {
-				values[col+curHint] = -1;
+			if (col+curHint < row.getLength()) {
+				row.set(col+curHint, CLEAR);
 			}
 			solveForward(hintIdx+1, col+curHint+1);
 			return;
 		}
 
-		assert values[col] == 0;
+		assert row.get(col) == 0;
 
 		// look ahead to see if any cell has been set
 
 		for (int j = 1; j < curHint; j++) {
-			if (values[col+j] == -1) {
+			if (row.get(col+j) == -1) {
 				// cannot fit here
-				values[col] = -1;
+				row.set(col, CLEAR);
 				return;
 			}
 		}
 
-		if (col+curHint < values.length) {
-			if (values[col+curHint] == 1) {
+		if (col+curHint < row.getLength()) {
+			if (row.get(col+curHint) == 1) {
 				// this span cannot start here
-				values[col] = -1;
+				row.set(col, CLEAR);
 				return;
 			}
 		}
@@ -110,21 +110,21 @@ public class RowSolver
 	void solveInitial()
 	{
 		int sumFilled = 0;
-		for (int i = 0; i < hint.length; i++) {
-			sumFilled += hint[i];
+		for (int i = 0; i < row.getHintCount(); i++) {
+			sumFilled += row.getHint(i);
 		}
-		int gapCount = hint.length - 1;
+		int gapCount = row.getHintCount() - 1;
 		int needed = sumFilled + gapCount;
-		int flex = values.length - needed;
+		int flex = row.getLength() - needed;
 
 		int col = 0;
-		for (int i = 0; i < hint.length; i++)
+		for (int i = 0; i < row.getHintCount(); i++)
 		{
-			int curHint = hint[i];
+			int curHint = row.getHint(i);
 			if (curHint > flex) {
 				int excess = curHint - flex;
 				for (int j = col + flex; j < col + curHint; j++) {
-					values[j] = 1;
+					row.set(j, FILLED);
 				}
 			}
 			col += curHint + 1;
