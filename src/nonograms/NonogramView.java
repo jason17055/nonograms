@@ -96,37 +96,39 @@ public class NonogramView extends JComponent
 
 	String getRowHintAsString(int row)
 	{
+		int [] hint = model.rowHints[row];
 		StringBuilder sb = new StringBuilder();
-		for (int j = 0; j < model.rowHints[row].length; j++) {
-			sb.append(Integer.toString(model.rowHints[row][j]));
-			sb.append(" ");
+		for (int j = 0; j < hint.length; j++) {
+			sb.append(Integer.toString(hint[j]));
+			sb.append(j == hint.length-1 ? " " : "  ");
 		}
 		return sb.toString();
 	}
 
-	void drawColumnHint(Graphics2D gr, int column)
+	void drawColumnHint(Graphics2D gr, Point p, int column)
 	{
 		int [] hint = model.columnHints[column];
 		FontMetrics fm = gr.getFontMetrics();
 
 		for (int j = 0; j < hint.length; j++) {
-			int y = maxColumnHintHeight + (j - hint.length) * fm.getHeight() + fm.getAscent();
+			int y = p.y + (j - hint.length) * fm.getHeight() + fm.getAscent();
 			String s = Integer.toString(hint[j]);
-			int x = maxRowHintWidth + column * columnWidth
-				+ columnWidth / 2
+			int x = p.x + columnWidth / 2
 				- fm.stringWidth(s) / 2;
 			gr.drawString(s, x, y);
 		}
 	}
 
-	void drawRowHint(Graphics2D gr, int row)
+	void drawRowHint(Graphics2D gr, Point p, int row)
 	{
 		String s = getRowHintAsString(row);
 		FontMetrics fm = gr.getFontMetrics();
 
 		gr.drawString(s,
-			maxRowHintWidth - fm.stringWidth(s),
-			maxColumnHintHeight + row * rowHeight + fm.getAscent() + 1);
+			p.x - fm.stringWidth(s),
+			p.y + rowHeight / 2
+				- fm.getHeight() / 2
+				+ fm.getAscent());
 	}
 
 	void drawFilledCell(Graphics2D gr, int x, int y)
@@ -209,7 +211,7 @@ public class NonogramView extends JComponent
 			}
 
 			if (i < model.getWidth()) {
-				drawColumnHint(gr, i);
+				drawColumnHint(gr, p, i);
 			}
 		}
 
@@ -222,7 +224,7 @@ public class NonogramView extends JComponent
 			}
 
 			if (i < model.getHeight()) {
-				drawRowHint(gr, i);
+				drawRowHint(gr, p, i);
 			}
 		}
 
