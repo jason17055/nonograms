@@ -2,6 +2,7 @@ package nonograms;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.io.*;
 import javax.swing.*;
 import static nonograms.Nonogram.*;
 
@@ -57,7 +58,12 @@ public class MainWindow extends JFrame
 
 	public MainWindow()
 	{
-		this.view = new NonogramView(sample2());
+		this(sample2());
+	}
+
+	public MainWindow(Nonogram N)
+	{
+		this.view = new NonogramView(N);
 		add(view, BorderLayout.CENTER);
 
 		JPanel buttonPane = new JPanel();
@@ -176,11 +182,30 @@ public class MainWindow extends JFrame
 		}
 	}
 
-	public static void main(String [] args)
+	public static void main(final String [] args)
 	{
 		SwingUtilities.invokeLater(new Runnable() {
 		public void run() {
-			new MainWindow().setVisible(true);
+			try {
+
+			MainWindow mw;
+			if (args.length >= 1) {
+				mw = new MainWindow(
+					NonogramReader.load(new File(args[0]))
+					);
+			}
+			else {
+				mw = new MainWindow();
+			}
+			mw.setVisible(true);
+
+			}
+			catch (Exception e) {
+				JOptionPane.showMessageDialog(null,
+					e.getMessage(),
+					"Error",
+					JOptionPane.ERROR_MESSAGE);
+			}
 		}});
 	}
 }
