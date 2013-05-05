@@ -56,6 +56,14 @@ public class MainWindow extends JFrame
 			}});
 		buttonPane.add(btn3);
 
+		JButton solveBtn;
+		solveBtn = new JButton("Solve");
+		solveBtn.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent evt) {
+				solveClicked();
+			}});
+		buttonPane.add(solveBtn);
+
 		editorBtn = new JToggleButton("Editor");
 		editorBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent evt) {
@@ -102,6 +110,11 @@ public class MainWindow extends JFrame
 		}
 
 		view.repaint();
+	}
+
+	void solveClicked()
+	{
+		//TODO
 	}
 
 	void editorClicked()
